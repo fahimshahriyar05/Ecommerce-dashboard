@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ecommerce Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --surface2: #1c1c28;
+    --border: #2a2a3d;
+    --accent: #7c3aed;
+    --accent2: #06b6d4;
+    --accent3: #f59e0b;
+    --accent4: #10b981;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --danger: #ef4444;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(124,58,237,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(124,58,237,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrapper { position: relative; z-index: 1; }
+
+  /* Header */
+  header {
+    padding: 2rem 3rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    backdrop-filter: blur(10px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,10,15,0.85);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    font-size: 1rem;
+  }
+
+  .logo h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .logo span { color: var(--accent2); }
+
+  .header-meta {
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-align: right;
+  }
+
+  .status-dot {
+    display: inline-block;
+    width: 6px; height: 6px;
+    background: var(--accent4);
+    border-radius: 50%;
+    margin-right: 6px;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* Main layout */
+  main { padding: 2.5rem 3rem; max-width: 1400px; margin: 0 auto; }
+
+  /* Section title */
+  .section-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* KPI Cards */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 3rem;
+  }
+
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.75rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .kpi-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent);
+  }
+
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .kpi-card.c1::before { background: var(--accent); }
+  .kpi-card.c2::before { background: var(--accent2); }
+  .kpi-card.c3::before { background: var(--accent3); }
+  .kpi-card.c4::before { background: var(--accent4); }
+
+  .kpi-icon {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    opacity: 0.8;
+  }
+
+  .kpi-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .kpi-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .kpi-card.c1 .kpi-value { color: var(--accent); }
+  .kpi-card.c2 .kpi-value { color: var(--accent2); }
+  .kpi-card.c3 .kpi-value { color: var(--accent3); }
+  .kpi-card.c4 .kpi-value { color: var(--accent4); }
+
+  .kpi-sub {
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-top: 0.5rem;
+  }
+
+  /* Charts grid */
+  .charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.75rem;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .chart-card.full { grid-column: 1 / -1; }
+
+  .chart-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+  }
+
+  .chart-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+  }
+
+  .chart-subtitle {
+    font-size: 0.65rem;
+    color: var(--muted);
+    margin-top: 0.25rem;
+  }
+
+  .chart-badge {
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.6rem;
+    border-radius: 99px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  .chart-wrap {
+    position: relative;
+    height: 260px;
+  }
+
+  /* Table */
+  .table-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.75rem;
+    margin-bottom: 3rem;
+    animation: fadeUp 0.7s ease both;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+  }
+
+  th {
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  td {
+    padding: 0.85rem 1rem;
+    font-size: 0.8rem;
+    border-bottom: 1px solid rgba(42,42,61,0.5);
+    transition: background 0.15s;
+  }
+
+  tr:hover td { background: var(--surface2); }
+  tr:last-child td { border-bottom: none; }
+
+  .rank {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    color: var(--border);
+  }
+
+  .rank-1 { color: var(--accent3); }
+  .rank-2 { color: var(--muted); }
+  .rank-3 { color: #cd7c2e; }
+
+  .bar-cell { min-width: 120px; }
+
+  .bar-bg {
+    height: 4px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+
+  .bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 99px;
+    transition: width 1s ease;
+  }
+
+  /* Loading skeleton */
+  .skeleton {
+    background: linear-gradient(90deg, var(--surface2) 25%, var(--border) 50%, var(--surface2) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 6px;
+    height: 2rem;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Error state */
+  .error-msg {
+    color: var(--danger);
+    font-size: 0.75rem;
+    padding: 0.5rem;
+    text-align: center;
+  }
+
+  /* Footer */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 1.5rem 3rem;
+    font-size: 0.65rem;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  @media (max-width: 768px) {
+    header, main, footer { padding: 1.25rem; }
+    .charts-grid { grid-template-columns: 1fr; }
+    .kpi-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">📦</div>
+    <h1>Eco<span>mmerce</span> Analytics</h1>
+  </div>
+  <div class="header-meta">
+    <div><span class="status-dot"></span>Live Data</div>
+    <div id="last-updated">Fetching...</div>
+  </div>
+</header>
+
+<main>
+
+  <!-- KPI Row -->
+  <div class="section-label">Key Metrics</div>
+  <div class="kpi-grid">
+    <div class="kpi-card c1">
+      <div class="kpi-icon">💰</div>
+      <div class="kpi-label">Total Revenue</div>
+      <div class="kpi-value" id="total-revenue"><div class="skeleton"></div></div>
+      <div class="kpi-sub">All time earnings</div>
+    </div>
+    <div class="kpi-card c2">
+      <div class="kpi-icon">📦</div>
+      <div class="kpi-label">Top Product Sales</div>
+      <div class="kpi-value" id="top-product-qty"><div class="skeleton"></div></div>
+      <div class="kpi-sub" id="top-product-name">units sold</div>
+    </div>
+    <div class="kpi-card c3">
+      <div class="kpi-icon">👤</div>
+      <div class="kpi-label">Top Customer Orders</div>
+      <div class="kpi-value" id="top-customer-orders"><div class="skeleton"></div></div>
+      <div class="kpi-sub" id="top-customer-name">most orders</div>
+    </div>
+    <div class="kpi-card c4">
+      <div class="kpi-icon">🗂️</div>
+      <div class="kpi-label">Top Category</div>
+      <div class="kpi-value" id="top-category-sales"><div class="skeleton"></div></div>
+      <div class="kpi-sub" id="top-category-name">items sold</div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="section-label">Analytics</div>
+  <div class="charts-grid">
+
+    <div class="chart-card full">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Monthly Revenue</div>
+          <div class="chart-subtitle">Revenue trend over time</div>
+        </div>
+        <span class="chart-badge">Line Chart</span>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="monthlyChart"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Category Sales</div>
+          <div class="chart-subtitle">Items sold by category</div>
+        </div>
+        <span class="chart-badge">Doughnut</span>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="categoryChart"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Top 5 Products</div>
+          <div class="chart-subtitle">By total units sold</div>
+        </div>
+        <span class="chart-badge">Bar Chart</span>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="productsChart"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Top Customers Table -->
+  <div class="section-label">Top Customers</div>
+  <div class="table-card">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title">Most Active Customers</div>
+        <div class="chart-subtitle">Ranked by number of orders</div>
+      </div>
+      <span class="chart-badge">Top 5</span>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Customer Name</th>
+          <th>Total Orders</th>
+          <th>Activity</th>
+        </tr>
+      </thead>
+      <tbody id="customers-tbody">
+        <tr><td colspan="4" style="text-align:center; color:var(--muted); padding:2rem;">Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Looker Studio -->
+  <div class="section-label">Looker Studio Report</div>
+  <div class="table-card" style="padding:0; overflow:hidden;">
+    <div class="chart-header" style="padding:1.75rem 1.75rem 1rem;">
+      <div>
+        <div class="chart-title">Interactive Report</div>
+        <div class="chart-subtitle">Full dashboard with filters — powered by Looker Studio</div>
+      </div>
+      <a href="https://lookerstudio.google.com/reporting/211e9680-27dc-4ad5-a12a-d46d6a2f6933/page/sGtuF"
+         target="_blank"
+         style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;padding:0.25rem 0.6rem;border-radius:99px;background:var(--surface2);border:1px solid var(--accent);color:var(--accent);text-decoration:none;">
+        Open Full ↗
+      </a>
+    </div>
+    <iframe
+      src="https://lookerstudio.google.com/embed/reporting/211e9680-27dc-4ad5-a12a-d46d6a2f6933/page/sGtuF"
+      width="100%"
+      height="700"
+      frameborder="0"
+      style="display:block; border-top: 1px solid var(--border);"
+      allowfullscreen
+      sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox">
+    </iframe>
+  </div>
+
+</main>
+
+<footer>
+  <span>Ecommerce Management System Dashboard</span>
+  <span>Data pulled from local MySQL via PHP APIs</span>
+</footer>
+
+</div>
+
+<script>
+  // ── Chart defaults ──────────────────────────────────────────
+  Chart.defaults.color = '#64748b';
+  Chart.defaults.font.family = "'DM Mono', monospace";
+  Chart.defaults.font.size = 11;
+
+  const COLORS = ['#7c3aed','#06b6d4','#f59e0b','#10b981','#ef4444','#8b5cf6','#0891b2'];
+
+  // ── Helpers ─────────────────────────────────────────────────
+  function fmt(n) {
+    return '$' + Number(n).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  }
+
+  async function load(url) {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  }
+
+  // ── Base URL ─────────────────────────────────────────────────
+  const BASE = 'http://localhost/ecommerce/';
+
+  // ── Total Revenue ────────────────────────────────────────────
+  load(BASE + 'total_revenue.php').then(data => {
+    document.getElementById('total-revenue').textContent = fmt(data.total_revenue ?? 0);
+  }).catch(() => {
+    document.getElementById('total-revenue').innerHTML = '<span class="error-msg">Error</span>';
+  });
+
+  // ── Monthly Revenue Chart ────────────────────────────────────
+  load(BASE + 'monthly_revenue.php').then(data => {
+    const labels = data.map(r => r.month);
+    const values = data.map(r => parseFloat(r.revenue));
+    new Chart(document.getElementById('monthlyChart'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Revenue',
+          data: values,
+          borderColor: '#7c3aed',
+          backgroundColor: 'rgba(124,58,237,0.08)',
+          pointBackgroundColor: '#7c3aed',
+          pointRadius: 4,
+          pointHoverRadius: 7,
+          tension: 0.4,
+          fill: true,
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: {
+          callbacks: { label: ctx => ' ' + fmt(ctx.raw) }
+        }},
+        scales: {
+          x: { grid: { color: 'rgba(42,42,61,0.5)' }, ticks: { maxRotation: 45 } },
+          y: { grid: { color: 'rgba(42,42,61,0.5)' },
+               ticks: { callback: v => '$' + (v/1000).toFixed(0) + 'k' } }
+        }
+      }
+    });
+  }).catch(() => {
+    document.getElementById('monthlyChart').parentElement.innerHTML = '<p class="error-msg">Could not load monthly revenue data</p>';
+  });
+
+  // ── Category Chart ───────────────────────────────────────────
+  load(BASE + 'category_sales.php').then(data => {
+    const labels = data.map(r => r.category_name);
+    const values = data.map(r => parseInt(r.total_items_sold));
+
+    // KPI card
+    const top = data[0];
+    if (top) {
+      document.getElementById('top-category-sales').textContent = parseInt(top.total_items_sold).toLocaleString();
+      document.getElementById('top-category-name').textContent = top.category_name;
+    }
+
+    new Chart(document.getElementById('categoryChart'), {
+      type: 'doughnut',
+      data: {
+        labels,
+        datasets: [{
+          data: values,
+          backgroundColor: COLORS,
+          borderColor: '#13131a',
+          borderWidth: 3,
+          hoverOffset: 8
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'right', labels: { padding: 16, boxWidth: 10, borderRadius: 4 } },
+          tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw.toLocaleString()} items` } }
+        },
+        cutout: '65%'
+      }
+    });
+  }).catch(() => {
+    document.getElementById('categoryChart').parentElement.innerHTML = '<p class="error-msg">Could not load category data</p>';
+  });
+
+  // ── Top Products Chart ───────────────────────────────────────
+  load(BASE + 'top_products.php').then(data => {
+    const labels = data.map(r => r.product_name.length > 20 ? r.product_name.slice(0,20)+'…' : r.product_name);
+    const values = data.map(r => parseInt(r.total_sold));
+
+    // KPI card
+    const top = data[0];
+    if (top) {
+      document.getElementById('top-product-qty').textContent = parseInt(top.total_sold).toLocaleString();
+      document.getElementById('top-product-name').textContent = top.product_name;
+    }
+
+    new Chart(document.getElementById('productsChart'), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Units Sold',
+          data: values,
+          backgroundColor: COLORS.map(c => c + 'cc'),
+          borderColor: COLORS,
+          borderWidth: 1,
+          borderRadius: 6,
+          borderSkipped: false
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        indexAxis: 'y',
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { color: 'rgba(42,42,61,0.5)' } },
+          y: { grid: { display: false } }
+        }
+      }
+    });
+  }).catch(() => {
+    document.getElementById('productsChart').parentElement.innerHTML = '<p class="error-msg">Could not load product data</p>';
+  });
+
+  // ── Most Active Customers Table ──────────────────────────────
+  load(BASE + 'most_active_customer.php').then(data => {
+    const tbody = document.getElementById('customers-tbody');
+    const maxOrders = Math.max(...data.map(r => parseInt(r.total_orders)));
+
+    // KPI card
+    const top = data[0];
+    if (top) {
+      document.getElementById('top-customer-orders').textContent = top.total_orders;
+      document.getElementById('top-customer-name').textContent = top.full_name;
+    }
+
+    tbody.innerHTML = data.map((r, i) => {
+      const pct = (parseInt(r.total_orders) / maxOrders * 100).toFixed(1);
+      return `
+        <tr>
+          <td><span class="rank rank-${i+1}">${i+1}</span></td>
+          <td>${r.full_name}</td>
+          <td style="font-family:'Syne',sans-serif;font-weight:700">${parseInt(r.total_orders).toLocaleString()}</td>
+          <td class="bar-cell">
+            <div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div>
+          </td>
+        </tr>`;
+    }).join('');
+  }).catch(() => {
+    document.getElementById('customers-tbody').innerHTML =
+      '<tr><td colspan="4" class="error-msg">Could not load customer data</td></tr>';
+  });
+
+  // ── Last updated ─────────────────────────────────────────────
+  document.getElementById('last-updated').textContent =
+    'Updated: ' + new Date().toLocaleTimeString();
+</script>
+</body>
+</html>
