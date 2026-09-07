@@ -1,5 +1,36 @@
 # 🛒 Ecommerce Management System Dashboard
 
+
+**A production-ready analytics dashboard analyzing 20,000+ e-commerce transactions**
+
+[![Live Dashboard](https://img.shields.io/badge/Live%20Dashboard-View%20on%20Looker-4285F4?style=for-the-badge)](https://datastudio.google.com/u/0/reporting/211e9680-27dc-4ad5-a12a-d46d6a2f6933/page/sGtuF)
+[![GitHub](https://img.shields.io/badge/GitHub-View%20Code-333?style=for-the-badge)](https://github.com/fahimshahriyar05/Ecommerce-dashboard)
+
+---
+
+## 📊 Key Metrics
+
+- **Dataset Size:** 20,000+ transaction records
+- **Database Tables:** 8 normalized tables (relational schema)
+- **SQL Queries:** 10+ production-ready queries
+- **Dashboard KPIs:** Revenue, products, customers, categories, trends
+- **Interactive Features:** Filters, drill-downs, date range selection
+
+---
+
+## 🎯 Business Insights Provided
+
+This dashboard answers critical business questions:
+- 💰 **Revenue Trends:** Monthly revenue growth and patterns
+- 🛍️ **Product Performance:** Which products drive the most sales?
+- 👥 **Customer Behavior:** Who are the most active customers?
+- 📦 **Category Analysis:** Which categories have the highest sales?
+- 📈 **Seasonality:** When do customers buy the most?
+
+---
+
+## 🏗️ Architecture Overview
+
 A full-stack data analytics dashboard built with **PHP**, **MySQL**, **Chart.js**, and **Looker Studio** — featuring live data visualizations pulled directly from a relational database.
 
 ---
